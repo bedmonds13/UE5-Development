@@ -10,23 +10,29 @@
 #include "CharacterAttackInputComponent.generated.h"
 
 USTRUCT(BlueprintType)
-struct FCharacterAttackConfig
+struct FCharacterAttack
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+		class UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+		int32 InputDelay;
+};
+
+USTRUCT(BlueprintType)
+struct FCharacterCombo
 {
 	GENERATED_BODY()
 		UPROPERTY(EditAnywhere)
 		UInputAction* InputAction;
-
+	
 		UPROPERTY(EditAnywhere)
-		TArray<class UAnimMontage *> AnimMontages;
+		TArray<FCharacterAttack> CharacterAttack;
 				
 };
-UENUM(BlueprintType)
-enum AttackType
-{
-	NONE UMETA(DisplayName = "NONE"),
-	Light UMETA(DisplayName = "Light"),
-	Heavy UMETA(DisplayName = "Heavy")
-};
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT_API UCharacterAttackInputComponent : public UActorComponent
@@ -39,20 +45,21 @@ public:
 		
 	
 	UPROPERTY(EditDefaultsOnly)
-	FCharacterAttackConfig LightAttackCombo;
+	FCharacterCombo LightAttackCombo;
 
 	UPROPERTY(EditDefaultsOnly)
-	FCharacterAttackConfig HeavyAttackCombo;
+	FCharacterCombo HeavyAttackCombo;
 
-	UPROPERTY(EditDefaultsOnly)
-	TEnumAsByte<AttackType> CurrentAttackType;
+	UPROPERTY(EditAnywhere)
+		bool UseDebugs;
+	
 
 	FTimerHandle ComboResetTimer;
 	FTimerHandle ComboInputDelay;
-	UAnimMontage* CurrentMontage;
 
 private:
-	FCharacterAttackConfig* CurrentComboConfig;
+	UAnimMontage* CurrentMontage;
+	FCharacterCombo* CurrentComboConfig;
 	int32 current_index;
 	bool InputEnabled;
 	
@@ -67,6 +74,9 @@ public:
 	void LightAttack(const FInputActionValue& Value);
 	void HeavyAttack(const FInputActionValue& Value);
 	void ResetCombo();
+	bool IsComboInterrupted(FCharacterCombo& Combo);
+	void Attack();
+
 
 	UFUNCTION()
 	void ResetCombo_Delay(UAnimMontage* Montage, bool Interrupted);

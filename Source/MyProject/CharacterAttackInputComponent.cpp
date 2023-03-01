@@ -18,6 +18,7 @@ UCharacterAttackInputComponent::UCharacterAttackInputComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	InputEnabled = true;
+	UseDebugs = false;
 	// ...
 }
 
@@ -41,8 +42,10 @@ void UCharacterAttackInputComponent::BeginPlay()
 			}
 		}
 	}
+	/*
 	UAnimInstance* AnimInstance = Cast<UAnimInstance>(Cast<ABaseCharacter>(GetOwner())->GetMesh()->GetAnimInstance());
 	AnimInstance->OnMontageEnded.AddDynamic(this, &UCharacterAttackInputComponent::ResetCombo_Delay);
+	*/
 	
 }
 
@@ -67,54 +70,28 @@ void UCharacterAttackInputComponent::BindInput(UInputComponent* PlayerInputCompo
 
 void UCharacterAttackInputComponent::LightAttack(const FInputActionValue& Value)
 {
-	if (ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner()))
+	if (CurrentComboConfig == nullptr)
 	{
-		if (InputEnabled)
-		{
-			if (CurrentComboConfig == nullptr || CurrentComboConfig == &LightAttackCombo)
-			{
-				CurrentComboConfig = &LightAttackCombo;
-				if (current_index <= LightAttackCombo.AnimMontages.Num() - 1 &&  LightAttackCombo.AnimMontages[current_index] != nullptr)
-				{
-					float TimerLength = LightAttackCombo.AnimMontages[current_index]->GetPlayLength() * 0.75f;
-					GetWorld()->GetTimerManager().SetTimer(ComboInputDelay, this, &UCharacterAttackInputComponent::HandleComboDelay, TimerLength, false);
-					CurrentMontage = LightAttackCombo.AnimMontages[current_index];
-					
-					Character->PlayAnimMontage(LightAttackCombo.AnimMontages[current_index]);
-					current_index++;
-				}
-				else
-					ResetCombo();
-			}
-			else
-				ResetCombo();
-		}
+		CurrentComboConfig = &LightAttackCombo;
+		Attack();
 	}
+	else if (!IsComboInterrupted(LightAttackCombo))
+		Attack();
+	else
+		ResetCombo();
 }
 
 void UCharacterAttackInputComponent::HeavyAttack(const FInputActionValue& Value)
 {
-	if (ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner()))
+	if (CurrentComboConfig == nullptr)
 	{
-		if (InputEnabled)
-		{
-			if (CurrentComboConfig == nullptr || CurrentComboConfig == &HeavyAttackCombo )
-			{
-				CurrentComboConfig = &HeavyAttackCombo;
-				if (current_index <= HeavyAttackCombo.AnimMontages.Num() - 1 && HeavyAttackCombo.AnimMontages[current_index] != nullptr)
-				{
-					float TimerLength = HeavyAttackCombo.AnimMontages[current_index]->GetPlayLength() * 0.75f;
-					GetWorld()->GetTimerManager().SetTimer(ComboInputDelay, this, &UCharacterAttackInputComponent::HandleComboDelay, TimerLength, false);
-					Character->PlayAnimMontage(HeavyAttackCombo.AnimMontages[current_index]);
-					current_index++;
-				}
-				else
-					ResetCombo();
-			}
-			else
-				ResetCombo();			
-		}
+		CurrentComboConfig = &HeavyAttackCombo;
+		Attack();
 	}
+	else if (!IsComboInterrupted(HeavyAttackCombo))
+		Attack();
+	else
+		ResetCombo();
 }
 
 
@@ -125,9 +102,57 @@ void UCharacterAttackInputComponent::ResetCombo()
 	InputEnabled = true;
 }
 
+bool UCharacterAttackInputComponent::IsComboInterrupted(FCharacterCombo& Combo)
+{
+	return  !(CurrentComboConfig == &Combo);
+}
+
+
+
+void UCharacterAttackInputComponent::Attack()
+{
+	if (ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner()))
+	{
+		if (InputEnabled)
+		{
+			if (CurrentComboConfig != nullptr )
+			{
+				if (current_index <= CurrentComboConfig->CharacterAttack.Num() - 1 && CurrentComboConfig->CharacterAttack[current_index].AttackMontage != nullptr)
+				{
+					CurrentMontage = CurrentComboConfig->CharacterAttack[current_index].AttackMontage;
+					Character->PlayAnimMontage(CurrentComboConfig->CharacterAttack[current_index].AttackMontage);
+					InputEnabled = false;
+					if (current_index == CurrentComboConfig->CharacterAttack.Num() - 1)
+					{
+						float TimerLength = CurrentComboConfig->CharacterAttack[current_index].AttackMontage->GetPlayLength();
+						GetWorld()->GetTimerManager().SetTimer(ComboInputDelay, this, &UCharacterAttackInputComponent::ResetCombo, TimerLength, false);
+					}
+					else
+					{
+						float TimerLength = CurrentComboConfig->CharacterAttack[current_index].AttackMontage->GetPlayLength() * 0.75f;
+						GetWorld()->GetTimerManager().SetTimer(ComboInputDelay, this, &UCharacterAttackInputComponent::HandleComboDelay, TimerLength, false);
+					}
+					current_index++;
+				}
+				else
+					ResetCombo();
+			}
+		}
+	}
+}
+
 void UCharacterAttackInputComponent::ResetCombo_Delay(UAnimMontage* Montage, bool Interrupted)
 {
-	GetWorld()->GetTimerManager().SetTimer(ComboResetTimer, this, &UCharacterAttackInputComponent::ResetCombo, 3.0f, false);
+	if (CurrentComboConfig)
+	{
+		if (CurrentComboConfig->CharacterAttack[current_index - 1].AttackMontage != nullptr)
+		{
+			FCharacterAttack CharacterAttack = CurrentComboConfig->CharacterAttack[current_index - 1];
+			GetWorld()->GetTimerManager().SetTimer(ComboResetTimer, this, &UCharacterAttackInputComponent::ResetCombo, CharacterAttack.InputDelay, false);
+		}
+	}
+	else
+		GetWorld()->GetTimerManager().SetTimer(ComboResetTimer, this, &UCharacterAttackInputComponent::ResetCombo, 1.0f, false);
 }
 
 void UCharacterAttackInputComponent::HandleComboDelay()
