@@ -57,6 +57,10 @@ public:
 	FTimerHandle ComboResetTimer;
 	FTimerHandle ComboInputDelay;
 
+	FTimerHandle PlayMontageDelay;
+	FTimerDelegate MontageTimerDel;
+
+
 private:
 	UAnimMontage* CurrentMontage;
 	FCharacterCombo* CurrentComboConfig;
@@ -73,17 +77,20 @@ public:
 	void BindInput(UInputComponent* PlayerInputComponent, APlayerController* PC);
 	void LightAttack(const FInputActionValue& Value);
 	void HeavyAttack(const FInputActionValue& Value);
-	void ResetCombo();
-	bool IsComboInterrupted(FCharacterCombo& Combo);
 	void Attack();
+	void ResetCombo();
 
 
 	UFUNCTION()
 	void ResetCombo_Delay(UAnimMontage* Montage, bool Interrupted);
 	
-	
+	UFUNCTION()
+	void PlayAttackMontage();
 private:
+	bool IsComboInterrupted(FCharacterCombo& Combo);
 	void HandleComboDelay();
+	void DebugMessage(FString Message);
+
 
 	
 };

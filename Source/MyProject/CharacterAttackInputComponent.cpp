@@ -42,7 +42,6 @@ void UCharacterAttackInputComponent::BeginPlay()
 			}
 		}
 	}
-		
 }
 
 
@@ -55,13 +54,11 @@ void UCharacterAttackInputComponent::TickComponent(float DeltaTime, ELevelTick T
 }
 
 void UCharacterAttackInputComponent::BindInput(UInputComponent* PlayerInputComponent, APlayerController* PC)
-{
-	
+{	
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 	UEnhancedInputComponent* PEI = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	PEI->BindAction(LightAttackCombo.InputAction, ETriggerEvent::Triggered, this, &UCharacterAttackInputComponent::LightAttack);
 	PEI->BindAction(HeavyAttackCombo.InputAction, ETriggerEvent::Triggered, this, &UCharacterAttackInputComponent::HeavyAttack);
-	
 }
 
 void UCharacterAttackInputComponent::LightAttack(const FInputActionValue& Value)
@@ -96,7 +93,10 @@ void UCharacterAttackInputComponent::ResetCombo()
 	CurrentComboConfig = nullptr;
 	current_index = 0;
 	InputEnabled = true;
+	CurrentMontage = nullptr;
 }
+
+
 
 bool UCharacterAttackInputComponent::IsComboInterrupted(FCharacterCombo& Combo)
 {
@@ -111,28 +111,48 @@ void UCharacterAttackInputComponent::Attack()
 	{
 		if (InputEnabled)
 		{
+			DebugMessage(FString("Input enabled."));
 			if (CurrentComboConfig != nullptr )
 			{
 				if (current_index <= CurrentComboConfig->CharacterAttack.Num() - 1 && CurrentComboConfig->CharacterAttack[current_index].AttackMontage != nullptr)
 				{
+					if (CurrentMontage && Character->GetMesh()->GetAnimInstance()->Montage_IsPlaying(CurrentMontage))
+					{
+						DebugMessage(FString("Montage is still in play."));
+						float timeElapsed = Character->GetMesh()->GetAnimInstance()->Montage_GetPosition(CurrentMontage);
+						
+						float timeLeft = (CurrentMontage->GetPlayLength()* 0.75f) -  timeElapsed;
+						
+						if(timeLeft > 0)
+							GetWorld()->GetTimerManager().SetTimer(PlayMontageDelay, this, &UCharacterAttackInputComponent::PlayAttackMontage, timeLeft, false);
+						else
+							Character->PlayAnimMontage(CurrentComboConfig->CharacterAttack[current_index].AttackMontage);
+					}
+					else
+					{
+						DebugMessage(FString("Previous montage not in play."));
+						Character->PlayAnimMontage(CurrentComboConfig->CharacterAttack[current_index].AttackMontage);
+					}
 					CurrentMontage = CurrentComboConfig->CharacterAttack[current_index].AttackMontage;
-					Character->PlayAnimMontage(CurrentComboConfig->CharacterAttack[current_index].AttackMontage);
 					InputEnabled = false;
 					if (current_index == CurrentComboConfig->CharacterAttack.Num() - 1)
 					{
+						DebugMessage(FString("Playing last montage in Attack Combo"));
 						float TimerLength = CurrentComboConfig->CharacterAttack[current_index].AttackMontage->GetPlayLength();
 						GetWorld()->GetTimerManager().SetTimer(ComboInputDelay, this, &UCharacterAttackInputComponent::ResetCombo, TimerLength, false);
 					}
 					else
 					{
-						float TimerLength = CurrentComboConfig->CharacterAttack[current_index].AttackMontage->GetPlayLength() * 0.75f;
+						float TimerLength = CurrentComboConfig->CharacterAttack[current_index].AttackMontage->GetPlayLength() * 0.25f;
 						GetWorld()->GetTimerManager().SetTimer(ComboInputDelay, this, &UCharacterAttackInputComponent::HandleComboDelay, TimerLength, false);
+
 					}
 					current_index++;
 				}
 				else
 					ResetCombo();
 			}
+			DebugMessage(FString("Input disabled."));
 		}
 	}
 }
@@ -151,7 +171,23 @@ void UCharacterAttackInputComponent::ResetCombo_Delay(UAnimMontage* Montage, boo
 		GetWorld()->GetTimerManager().SetTimer(ComboResetTimer, this, &UCharacterAttackInputComponent::ResetCombo, 1.0f, false);
 }
 
+void UCharacterAttackInputComponent::PlayAttackMontage()
+{
+	if (ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner()))
+	{
+		if (CurrentMontage)
+			Character->PlayAnimMontage(CurrentMontage);
+	}
+}
+
 void UCharacterAttackInputComponent::HandleComboDelay()
 {
 	InputEnabled = true;
 }
+
+void UCharacterAttackInputComponent::DebugMessage(FString Message)
+{
+	if (GEngine && UseDebugs)
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, Message, false);
+}
+
