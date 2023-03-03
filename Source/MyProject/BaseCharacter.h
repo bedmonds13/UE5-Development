@@ -19,27 +19,8 @@ protected:
 		class UInputMappingContext* InputMapping;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
-		UInputAction* InputSequenceAttack;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
 		class UMyInputConfigData* InputActions;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Animations")
-		class UAnimMontage* LightAttackAnim;
-	UPROPERTY(EditDefaultsOnly, Category = "Animations")
-		class UAnimMontage* HeavyAttackAnim;
-	UPROPERTY(EditDefaultsOnly, Category = "Animations")
-		class UAnimMontage* SequenceAttackAnim;
-
-	UPROPERTY(BlueprintReadOnly)
-		FTimerHandle AttackTimerHandle;
-
-	
-
-	bool CanAttack;
-	//Combo Attack
-	int32 comboindex_previous ;
-	int32 comboindex_next;
 public:
 	// Sets default values for this character's properties
 	ABaseCharacter();
@@ -56,15 +37,8 @@ public:
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void CheckCombo(UAnimMontage* NextMontage);
-	void ResetCombo();
-	void LightAttack(const FInputActionValue& Value);
-	void HeavyAttack(const FInputActionValue& Value);
-	void ComboAttack(const FInputActionValue& Value);
-	void SequenceAttack(const FInputActionValue& Value);
 	void SetInputDisableTimer(float TimerRate);
 	void EnablePlayerInput();
 
-	UFUNCTION()
-	void Event_OnMontageEnded(UAnimMontage* Montage, bool Interrupted);
+	
 };

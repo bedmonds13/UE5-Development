@@ -42,11 +42,7 @@ void UCharacterAttackInputComponent::BeginPlay()
 			}
 		}
 	}
-	/*
-	UAnimInstance* AnimInstance = Cast<UAnimInstance>(Cast<ABaseCharacter>(GetOwner())->GetMesh()->GetAnimInstance());
-	AnimInstance->OnMontageEnded.AddDynamic(this, &UCharacterAttackInputComponent::ResetCombo_Delay);
-	*/
-	
+		
 }
 
 
