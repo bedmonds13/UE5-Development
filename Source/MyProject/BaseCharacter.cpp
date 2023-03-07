@@ -40,15 +40,16 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	Subsystem->ClearAllMappings();
+	//Subsystem->ClearAllMappings();
 	Subsystem->AddMappingContext(InputMapping, 0);
 
 	UEnhancedInputComponent* PEI = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-
+	PEI->BindAction(InputActions->InputJump, ETriggerEvent::Triggered, this, &ABaseCharacter::Jump);
+	/*
 	PEI->BindAction(InputActions->InputMove, ETriggerEvent::Triggered, this, &ABaseCharacter::Move);
 	PEI->BindAction(InputActions->InputLook, ETriggerEvent::Triggered, this, &ABaseCharacter::Look);
-	PEI->BindAction(InputActions->InputJump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 	PEI->BindAction(InputActions->InputJump, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+	*/
 }
 
 void ABaseCharacter::Move(const FInputActionValue& Value)
@@ -94,4 +95,10 @@ void ABaseCharacter::Look(const FInputActionValue& Value)
 			AddControllerPitchInput(LookValue.Y);
 		}
 	}
+}
+
+void ABaseCharacter::Jump(const FInputActionValue& Value)
+{
+	if(JumpMontage)
+		PlayAnimMontage(JumpMontage);
 }

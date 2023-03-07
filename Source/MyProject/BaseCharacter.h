@@ -21,6 +21,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
 		class UMyInputConfigData* InputActions;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
+	UAnimMontage * JumpMontage;
+
 public:
 	// Sets default values for this character's properties
 	ABaseCharacter();
@@ -37,6 +40,7 @@ public:
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Jump(const FInputActionValue& Value);
 	void SetInputDisableTimer(float TimerRate);
 	void EnablePlayerInput();
 

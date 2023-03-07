@@ -61,7 +61,7 @@ void AMyProjectCharacter::BeginPlay()
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			Subsystem->AddMappingContext(DefaultMappingContext, 1);
 		}
 	}
 	
@@ -95,7 +95,7 @@ void AMyProjectCharacter::Move(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	/*
+	
 	if (Controller != nullptr)
 	{
 		// find out which way is forward
@@ -112,14 +112,14 @@ void AMyProjectCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
-	*/
+	
 }
 
 void AMyProjectCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
-	/*
+	
 
 	if (Controller != nullptr)
 	{
@@ -127,7 +127,7 @@ void AMyProjectCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
-	*/
+	
 }
 
 
