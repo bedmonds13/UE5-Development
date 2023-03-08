@@ -18,7 +18,7 @@ struct FCharacterAttack
 		class UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
-		int32 InputDelay;
+		int32 ComboResetOffset;
 };
 
 USTRUCT(BlueprintType)
@@ -80,6 +80,8 @@ public:
 	void Attack();
 	void ResetCombo();
 
+	
+	void ResetCombo_Delay(float DelayLength);
 
 	UFUNCTION()
 	void ResetCombo_Delay(UAnimMontage* Montage, bool Interrupted);

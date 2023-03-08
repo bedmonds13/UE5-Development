@@ -143,9 +143,11 @@ void UCharacterAttackInputComponent::Attack()
 					}
 					else
 					{
-						float TimerLength = CurrentComboConfig->CharacterAttack[current_index].AttackMontage->GetPlayLength() * 0.25f;
-						GetWorld()->GetTimerManager().SetTimer(ComboInputDelay, this, &UCharacterAttackInputComponent::HandleComboDelay, TimerLength, false);
-
+						float InputDelayTimer = CurrentComboConfig->CharacterAttack[current_index].AttackMontage->GetPlayLength() * 0.25f;
+						GetWorld()->GetTimerManager().SetTimer(ComboInputDelay, this, &UCharacterAttackInputComponent::HandleComboDelay, InputDelayTimer, false);
+						
+						float ComboResetLength = CurrentComboConfig->CharacterAttack[current_index].AttackMontage->GetPlayLength() + CurrentComboConfig->CharacterAttack[current_index].ComboResetOffset;
+						GetWorld()->GetTimerManager().SetTimer(ComboResetTimer, this, &UCharacterAttackInputComponent::ResetCombo, ComboResetLength, false);
 					}
 					current_index++;
 				}
@@ -156,7 +158,10 @@ void UCharacterAttackInputComponent::Attack()
 		}
 	}
 }
-
+void UCharacterAttackInputComponent::ResetCombo_Delay(float DelayLength)
+{
+	GetWorld()->GetTimerManager().SetTimer(ComboResetTimer, this, &UCharacterAttackInputComponent::ResetCombo, 1.0f, false);
+}
 void UCharacterAttackInputComponent::ResetCombo_Delay(UAnimMontage* Montage, bool Interrupted)
 {
 	if (CurrentComboConfig)
@@ -164,7 +169,7 @@ void UCharacterAttackInputComponent::ResetCombo_Delay(UAnimMontage* Montage, boo
 		if (CurrentComboConfig->CharacterAttack[current_index - 1].AttackMontage != nullptr)
 		{
 			FCharacterAttack CharacterAttack = CurrentComboConfig->CharacterAttack[current_index - 1];
-			GetWorld()->GetTimerManager().SetTimer(ComboResetTimer, this, &UCharacterAttackInputComponent::ResetCombo, CharacterAttack.InputDelay, false);
+			GetWorld()->GetTimerManager().SetTimer(ComboResetTimer, this, &UCharacterAttackInputComponent::ResetCombo, CharacterAttack.ComboResetOffset, false);
 		}
 	}
 	else
