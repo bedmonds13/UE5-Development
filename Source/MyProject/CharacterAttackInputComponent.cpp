@@ -114,8 +114,10 @@ void UCharacterAttackInputComponent::Attack()
 			DebugMessage(FString("Input enabled."));
 			if (CurrentComboConfig != nullptr )
 			{
+				//Check that ComboConfig has values and CurrentCharacterAttack is filled with a valid montage
 				if (current_index <= CurrentComboConfig->CharacterAttack.Num() - 1 && CurrentComboConfig->CharacterAttack[current_index].AttackMontage != nullptr)
 				{
+					//If a montage is playing at time of next input set a timer to play the next montage at the end of the current one.
 					if (CurrentMontage && Character->GetMesh()->GetAnimInstance()->Montage_IsPlaying(CurrentMontage))
 					{
 						DebugMessage(FString("Montage is still in play."));
@@ -137,12 +139,14 @@ void UCharacterAttackInputComponent::Attack()
 					InputEnabled = false;
 					if (current_index == CurrentComboConfig->CharacterAttack.Num() - 1)
 					{
+						//Reset Combo if we have reached the last montage at the end of montage being played
 						DebugMessage(FString("Playing last montage in Attack Combo"));
 						float TimerLength = CurrentComboConfig->CharacterAttack[current_index].AttackMontage->GetPlayLength();
 						GetWorld()->GetTimerManager().SetTimer(ComboInputDelay, this, &UCharacterAttackInputComponent::ResetCombo, TimerLength, false);
 					}
 					else
 					{
+
 						float InputDelayTimer = CurrentComboConfig->CharacterAttack[current_index].AttackMontage->GetPlayLength() * 0.25f;
 						GetWorld()->GetTimerManager().SetTimer(ComboInputDelay, this, &UCharacterAttackInputComponent::HandleComboDelay, InputDelayTimer, false);
 						

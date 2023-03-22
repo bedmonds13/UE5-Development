@@ -7,6 +7,7 @@
 #include "MyInputConfigData.h"
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "MyProjectCharacter.h"
+#include "InventoryComponent.h"
 #include "BaseCharacter.generated.h"
 
 UCLASS()
@@ -23,6 +24,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
 	UAnimMontage * JumpMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UInventoryComponent* InventoryComponent;
 
 public:
 	// Sets default values for this character's properties
@@ -44,5 +48,6 @@ public:
 	void SetInputDisableTimer(float TimerRate);
 	void EnablePlayerInput();
 
-	
+	UFUNCTION()
+		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

@@ -9,7 +9,9 @@
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TimerManager.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "Item.h"
 
 
 // Sets default values
@@ -17,6 +19,10 @@ ABaseCharacter::ABaseCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(FName("InventoryComponent"));
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABaseCharacter::OnOverlapBegin);
+	
 }
 
 // Called when the game starts or when spawned
@@ -101,4 +107,12 @@ void ABaseCharacter::Jump(const FInputActionValue& Value)
 {
 	if(JumpMontage)
 		PlayAnimMontage(JumpMontage);
+}
+
+void ABaseCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (AItem* PickUpItem = Cast<AItem>(OtherActor))
+	{
+		InventoryComponent->AddToInventory(PickUpItem);
+	}
 }

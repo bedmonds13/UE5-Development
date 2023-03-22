@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ItemType.h"
+#include "Styling/SlateBrush.h"
+#include "Components/BoxComponent.h"
 #include "Item.generated.h"
 
 UCLASS()
@@ -19,13 +21,24 @@ public:
 public:	
 	// Sets default values for this actor's properties
 	AItem();
+	
+	UPROPERTY(EditDefaultsOnly)
+	FString ItemName;
+
+	UPROPERTY(EditDefaultsOnly)
+	FSlateBrush ItemImage;
+
+	UPROPERTY(EditDefaultsOnly)
+		UBoxComponent* BoxComponent;
+
+	
+
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		UStaticMeshComponent* MeshComponent;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
