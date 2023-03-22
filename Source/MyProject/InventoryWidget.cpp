@@ -4,6 +4,23 @@
 #include "InventoryWidget.h"
 #include "InventoryComponent.h"
 
+void UInventoryWidget::InitializeWidget(UInventoryComponent* InventoryItems)
+{
+	InventoryRef = InventoryItems;
+	CloseButton->OnClicked.AddDynamic(InventoryRef, &UInventoryComponent::ToggleInventory);
+	CreateSlots();
+	FillSlots();
+}
+
+void UInventoryWidget::Reset()
+{
+	ClearSlots();
+	CreateSlots();
+	FillSlots();
+}
+
+
+
 void UInventoryWidget::FillSlots()
 {
 	if (InventoryRef)
@@ -28,34 +45,6 @@ void UInventoryWidget::FillSlots()
 	}
 }
 
-
-
-
-void UInventoryWidget::NativeConstruct()
-{
-	
-}
-
-
-void UInventoryWidget::InitializeWidget(UInventoryComponent* InventoryItems)
-{
-	InventoryRef = InventoryItems;
-	CloseButton->OnClicked.AddDynamic(InventoryRef, &UInventoryComponent::ToggleInventory);
-	CreateSlots();
-	FillSlots();
-}
-
-void UInventoryWidget::ClearSlots()
-{
-	GridPanel->ClearChildren();
-}
-void UInventoryWidget::Reset()
-{
-	ClearSlots();
-	CreateSlots();
-	FillSlots();
-}
-
 void UInventoryWidget::CreateSlots()
 {
 	int index = 0;
@@ -69,4 +58,10 @@ void UInventoryWidget::CreateSlots()
 			index++;
 		}
 	}
+}
+
+
+void UInventoryWidget::ClearSlots()
+{
+	GridPanel->ClearChildren();
 }

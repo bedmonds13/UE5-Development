@@ -41,9 +41,7 @@ void UInventoryComponent::AddToInventory(AItem* NewItem)
 	}
 }
 
-void UInventoryComponent::RemoveItem(AItem* RemoveItem)
-{
-}
+
 
 void UInventoryComponent::BindInput(UInputComponent* PlayerInputComponent, APlayerController* PC)
 {

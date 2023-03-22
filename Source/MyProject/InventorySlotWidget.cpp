@@ -4,29 +4,20 @@
 #include "InventorySlotWidget.h"
 #include "InventoryComponent.h"
 class UInventoryWidget;
-FReply UInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+
+
+void UInventorySlotWidget::InitializeWidget(UInventoryComponent* Inventory,  int32 Newindex)
 {
-	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-	return CustomDetectDrag(InMouseEvent, this, EKeys::LeftMouseButton);
+	InventoryRef = Inventory;
+	index = Newindex;
 }
-void UInventorySlotWidget::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+
+void UInventorySlotWidget::FillWidget(FString NewItemName, FSlateBrush NewItemImage)
 {
-}
-
-void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
-{
-	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
-
-	UDragWidget* DragDropOperation = NewObject<UDragWidget>();
-
-	this->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	DragDropOperation->WidgetReference = this;
-	DragDropOperation->DragOffset = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());;
-
-	DragDropOperation->DefaultDragVisual = this;
-	DragDropOperation->Pivot = EDragPivot::MouseDown;
-
-	OutOperation = DragDropOperation;
+	this->ItemName = NewItemName;
+	this->ItemImage = NewItemImage;
+	ImageComponent->SetOpacity(1);
+	SlotFilled = true;
 }
 
 void UInventorySlotWidget::RemoveItem()
@@ -38,26 +29,13 @@ void UInventorySlotWidget::RemoveItem()
 	SlotFilled = false;
 }
 
-FReply UInventorySlotWidget::CustomDetectDrag(const FPointerEvent& InMouseEvent, UWidget* WidgetDetectingDrag, FKey DragKey)
+FReply UInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	if (InMouseEvent.GetEffectingButton() == DragKey /*|| PointerEvent.IsTouchEvent()*/)
-	{
-		FEventReply Reply;
-		Reply.NativeReply = FReply::Handled();
-
-		if (WidgetDetectingDrag)
-		{
-			TSharedPtr<SWidget> SlateWidgetDetectingDrag = WidgetDetectingDrag->GetCachedWidget();
-			if (SlateWidgetDetectingDrag.IsValid())
-			{
-				Reply.NativeReply = Reply.NativeReply.DetectDrag(SlateWidgetDetectingDrag.ToSharedRef(), DragKey);
-				return Reply.NativeReply;
-			}
-		}
-	}
-
-	return FReply::Unhandled();
+	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+	return CustomDetectDrag(InMouseEvent, this, EKeys::LeftMouseButton);
 }
+//Drag Drop Operations
+
 bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
 	bool DropSuccess = false;
@@ -82,16 +60,39 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	return DropSuccess;
 }
 
-void UInventorySlotWidget::InitializeWidget(UInventoryComponent* Inventory,  int32 Newindex)
+void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
-	InventoryRef = Inventory;
-	index = Newindex;
+	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+
+	UDragWidget* DragDropOperation = NewObject<UDragWidget>();
+
+	this->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	DragDropOperation->WidgetReference = this;
+	DragDropOperation->DragOffset = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());;
+
+	DragDropOperation->DefaultDragVisual = this;
+	DragDropOperation->Pivot = EDragPivot::MouseDown;
+
+	OutOperation = DragDropOperation;
 }
 
-void UInventorySlotWidget::FillWidget(FString NewItemName, FSlateBrush NewItemImage)
+FReply UInventorySlotWidget::CustomDetectDrag(const FPointerEvent& InMouseEvent, UWidget* WidgetDetectingDrag, FKey DragKey)
 {
-	this->ItemName = NewItemName;
-	this->ItemImage = NewItemImage;
-	ImageComponent->SetOpacity(1);
-	SlotFilled = true;
+	if (InMouseEvent.GetEffectingButton() == DragKey /*|| PointerEvent.IsTouchEvent()*/)
+	{
+		FEventReply Reply;
+		Reply.NativeReply = FReply::Handled();
+
+		if (WidgetDetectingDrag)
+		{
+			TSharedPtr<SWidget> SlateWidgetDetectingDrag = WidgetDetectingDrag->GetCachedWidget();
+			if (SlateWidgetDetectingDrag.IsValid())
+			{
+				Reply.NativeReply = Reply.NativeReply.DetectDrag(SlateWidgetDetectingDrag.ToSharedRef(), DragKey);
+				return Reply.NativeReply;
+			}
+		}
+	}
+
+	return FReply::Unhandled();
 }

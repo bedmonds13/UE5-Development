@@ -16,6 +16,7 @@ class MYPROJECT_API UInventoryComponent : public UActorComponent
 
 	bool InventoryOpen;
 	UInventoryWidget* InventoryWidget;
+	APlayerController* PlayerControllerRef;
 
 public:
 	// Sets default values for this component's properties
@@ -30,7 +31,6 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 	
-	APlayerController* PlayerControllerRef;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -39,17 +39,26 @@ public:
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void BindInput(UInputComponent* PlayerInputComponent, APlayerController* PC);
+	
+	void CreateInventoryWidget();
+	
+	UFUNCTION()
+	void ToggleInventory();
 	
 	UFUNCTION(BlueprintCallable)
 	void AddToInventory(AItem* NewItem);
-	void RemoveItem(AItem* RemoveItem);
+	
+	
+	UFUNCTION(BlueprintCallable)
 	void RemoveIndex(int32 RemoveIndex);
-	void BindInput(UInputComponent* PlayerInputComponent, APlayerController* PC);
-	UFUNCTION()
-	void ToggleInventory();
-	void CreateInventoryWidget();
-	void ResetWidget();
-	TArray<TSubclassOf<AItem>> GetInventoryItems();
+
 	void SwapItems(int32 firstIndex, int32 secondIndex);
+
+	
+	void ResetWidget();
+	
+	TArray<TSubclassOf<AItem>> GetInventoryItems();
+	
 	void MoveItem(int32 fromIndex, int32 toIndex);
 };

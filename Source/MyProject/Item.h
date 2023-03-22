@@ -21,7 +21,8 @@ public:
 public:	
 	// Sets default values for this actor's properties
 	AItem();
-	
+
+
 	UPROPERTY(EditDefaultsOnly)
 	FString ItemName;
 

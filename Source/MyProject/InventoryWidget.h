@@ -22,7 +22,7 @@ class MYPROJECT_API UInventoryWidget : public UUserWidget
 	GENERATED_BODY()
 
 
-public:
+protected:
 		
 	UPROPERTY(EditDefaultsOnly)
 		int32 GridWidth;
@@ -35,20 +35,20 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		TSubclassOf<UInventorySlotWidget> SlotWidgetClass;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-		UInventoryComponent* InventoryRef;
-
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UButton* CloseButton;
 	
+public:
 	void InitializeWidget(UInventoryComponent* InventoryItems);
 	void Reset();
+
 private:
 	void FillSlots();
 	void CreateSlots();
 	void ClearSlots();
 	
 protected:
-	virtual void NativeConstruct() override;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		UInventoryComponent* InventoryRef;
 };

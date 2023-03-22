@@ -14,7 +14,7 @@ bool UDropWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent
 	{
 		UInventorySlotWidget* SlotWidget = Cast<UInventorySlotWidget>(DragWidget->WidgetReference);
 
-		if (SlotWidget )
+		if (SlotWidget)
 		{
 			SlotWidget->RemoveItem();
 		}
