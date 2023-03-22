@@ -32,8 +32,15 @@ public:
 		TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 	
 protected:
+	UPROPERTY(EditAnywhere)
+		bool ShowDebugs;
+
+	UPROPERTY(EditDefaultsOnly)
+		float DropDistanceMultiplier;
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+
 
 public:
 
@@ -49,7 +56,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddToInventory(AItem* NewItem);
 	
-	
+	void DropFromInventory(TSubclassOf<AItem> Item);
+
 	UFUNCTION(BlueprintCallable)
 	void RemoveIndex(int32 RemoveIndex);
 

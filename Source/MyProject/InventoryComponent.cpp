@@ -9,6 +9,7 @@
 UInventoryComponent::UInventoryComponent()
 {
 	InventoryItems.Reserve(20);
+	DropDistanceMultiplier = 100;
 	
 }
 
@@ -39,6 +40,24 @@ void UInventoryComponent::AddToInventory(AItem* NewItem)
 		InventoryItems.Add(ItemClass);
 		NewItem->Destroy();
 	}
+}
+
+void UInventoryComponent::DropFromInventory(TSubclassOf<AItem> Item)
+{
+	ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner());
+	FVector OutLocation =  Character->GetActorLocation() + (Character->GetActorForwardVector() * 100);
+	FHitResult hitResult;
+	GetWorld()->LineTraceSingleByObjectType(hitResult, OutLocation, OutLocation + FVector(0, 0, -10000), FCollisionObjectQueryParams());
+	
+	if (ShowDebugs)
+	{
+		DrawDebugSphere(GetWorld(), OutLocation, 8, 4, FColor::Red, false, 5.0f);
+		DrawDebugLine(GetWorld(), OutLocation, hitResult.ImpactPoint, FColor::Red,false, 5.0f);
+	}
+
+	GetWorld()->SpawnActor<AItem>( Item, hitResult.ImpactPoint, FRotator::ZeroRotator);
+	/*
+	*/
 }
 
 
@@ -119,7 +138,11 @@ void UInventoryComponent::MoveItem(int32 fromIndex, int32 toIndex)
 
 void UInventoryComponent::RemoveIndex(int32 RemoveIndex)
 {
-	InventoryItems.RemoveAt(RemoveIndex);
+	if (InventoryItems.IsValidIndex(RemoveIndex))
+	{
+		DropFromInventory(InventoryItems[RemoveIndex]);
+		InventoryItems.RemoveAt(RemoveIndex);
+	}
 	if (InventoryOpen)
 	{
 		ResetWidget();
